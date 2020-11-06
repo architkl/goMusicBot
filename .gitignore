@@ -1,0 +1,8 @@
+client_secret.json
+songs/
+docs/
+internal/loadSound.go
+internal/playSound.go
+internal/playPlaylist.go
+internal/play.go
+internal/search.go
