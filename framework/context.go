@@ -13,11 +13,13 @@ type Context struct {
 	User         *discordgo.User
 	Message      *discordgo.MessageCreate
 	Args         []string
+	MediaPlayer  *Player
 	CmdHandler   *CommandHandler
 }
 
 func NewContext(discord *discordgo.Session, guild *discordgo.Guild, textChannel *discordgo.Channel,
-	user *discordgo.User, message *discordgo.MessageCreate, cmdHandler *CommandHandler) *Context {
+	user *discordgo.User, message *discordgo.MessageCreate, cmdHandler *CommandHandler,
+	player *Player) *Context {
 	ctx := new(Context)
 	ctx.Discord = discord
 	ctx.Guild = guild
@@ -25,6 +27,7 @@ func NewContext(discord *discordgo.Session, guild *discordgo.Guild, textChannel 
 	ctx.User = user
 	ctx.Message = message
 	ctx.CmdHandler = cmdHandler
+	ctx.MediaPlayer = player
 	return ctx
 }
 

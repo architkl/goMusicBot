@@ -20,6 +20,7 @@ var (
 	fPrefix    = flag.String("p", "!", "bot prefix")
 	CmdHandler *framework.CommandHandler
 	botId      string
+	player     *framework.Player
 )
 
 func main() {
@@ -28,6 +29,7 @@ func main() {
 	// channel to receive signal to shutdown bot
 	sc := make(chan os.Signal, 1)
 	CmdHandler = framework.NewCommandHandler()
+	player = framework.NewMediaPlayer()
 	registerCommands(sc)
 
 	dg, err := discordgo.New("Bot " + *fToken)
@@ -63,6 +65,7 @@ func commandHandler(discord *discordgo.Session, message *discordgo.MessageCreate
 	if user.ID == botId || user.Bot {
 		return
 	}
+
 	content := message.Content
 	if len(content) <= len(*fPrefix) {
 		return
@@ -74,12 +77,7 @@ func commandHandler(discord *discordgo.Session, message *discordgo.MessageCreate
 	if len(content) < 1 {
 		return
 	}
-	args := strings.Fields(content)
-	name := strings.ToLower(args[0])
-	command, found := CmdHandler.Get(name)
-	if !found {
-		return
-	}
+
 	channel, err := discord.State.Channel(message.ChannelID)
 	if err != nil {
 		log.Println("Error getting channel,", err)
@@ -90,17 +88,33 @@ func commandHandler(discord *discordgo.Session, message *discordgo.MessageCreate
 		log.Println("Error getting guild,", err)
 		return
 	}
-	ctx := framework.NewContext(discord, guild, channel, user, message, CmdHandler)
+
+	ctx := framework.NewContext(discord, guild, channel, user, message, CmdHandler, player)
+	args := strings.Fields(content)
 	ctx.Args = args[1:]
+
+	name := strings.ToLower(args[0])
+	middleware, command, found := CmdHandler.Get(name)
+	if !found {
+		return
+	}
+
+	m := *middleware
+	if err := m(*ctx); err != nil {
+		log.Println(err)
+		return
+	}
+
 	c := *command
 	c(*ctx)
 }
 
 func registerCommands(sc chan os.Signal) {
-	CmdHandler.Register("ping", internal.Ping, "respongs")
-	CmdHandler.Register("avatar", internal.Avatar, "returns user's avatar")
-	CmdHandler.Register("user", internal.Username, "returns user's username")
-	CmdHandler.Register("shutdown", func(ctx framework.Context) {
+	CmdHandler.Register("ping", internal.Logging, internal.Ping, "respongs")
+	CmdHandler.Register("avatar", internal.Logging, internal.Avatar, "returns user's avatar")
+	CmdHandler.Register("user", internal.Logging, internal.Username, "returns user's username")
+	CmdHandler.Register("pl", internal.CheckVoice, internal.PlayPlaylist, "play the given playlist")
+	CmdHandler.Register("shutdown", internal.Logging, func(ctx framework.Context) {
 		ctx.Reply("Bye!")
 		sc <- os.Interrupt
 	}, "shutdown the bot")

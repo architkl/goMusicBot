@@ -1,7 +1,7 @@
 package framework
 
 type Song struct {
-	id       string
-	title    string
-	duration string
+	Id       string
+	Title    string
+	Duration string
 }
