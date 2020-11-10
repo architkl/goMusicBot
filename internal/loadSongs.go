@@ -1,29 +1,13 @@
-package framework
+package internal
 
+/*
 import (
 	"bufio"
 	"log"
-	"os"
 	"strings"
 )
 
-type (
-	Song struct {
-		Id       string
-		Title    string
-		Duration string
-	}
-
-	IdListHandler struct {
-		IdList map[string]string
-	}
-)
-
-func NewIdListHandler() *IdListHandler {
-	return &IdListHandler{make(map[string]string)}
-}
-
-func (songList *IdListHandler) LoadSongs() {
+func LoadSongs() map[string]string {
 	file, err := os.OpenFile("./docs/keys.txt", os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		log.Fatal(err)
@@ -31,11 +15,12 @@ func (songList *IdListHandler) LoadSongs() {
 	}
 
 	scanner := bufio.NewScanner(file)
+	var list = make(map[string]string)
 	for scanner.Scan() {
 		line := scanner.Text()
 		words := strings.Split(line, ",")
 
-		songList.IdList[words[0]] = words[1]
+		list[words[0]] = words[1]
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -46,4 +31,7 @@ func (songList *IdListHandler) LoadSongs() {
 	if err != nil {
 		log.Println(err)
 	}
+
+	return list
 }
+*/

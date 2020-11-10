@@ -17,19 +17,22 @@ import (
 // Command line flags and global variables
 var (
 	fToken     = flag.String("t", "", "bot token")
-	fPrefix    = flag.String("p", "!", "bot prefix")
-	CmdHandler *framework.CommandHandler
+	fPrefix    = flag.String("p", "+", "bot prefix")
+	CmdHandler = framework.NewCommandHandler()
+	player     = framework.NewMediaPlayer()
+	sc         = make(chan os.Signal, 1)
+	songIdList = framework.NewIdListHandler()
 	botId      string
-	player     *framework.Player
 )
 
 func main() {
 	flag.Parse()
 
 	// channel to receive signal to shutdown bot
-	sc := make(chan os.Signal, 1)
-	CmdHandler = framework.NewCommandHandler()
-	player = framework.NewMediaPlayer()
+	// sc := make(chan os.Signal, 1)
+	// CmdHandler = framework.NewCommandHandler()
+	// player = framework.NewMediaPlayer()
+	songIdList.LoadSongs()
 	registerCommands(sc)
 
 	dg, err := discordgo.New("Bot " + *fToken)
@@ -89,7 +92,7 @@ func commandHandler(discord *discordgo.Session, message *discordgo.MessageCreate
 		return
 	}
 
-	ctx := framework.NewContext(discord, guild, channel, user, message, CmdHandler, player)
+	ctx := framework.NewContext(discord, guild, channel, user, message, CmdHandler, player, songIdList)
 	args := strings.Fields(content)
 	ctx.Args = args[1:]
 
@@ -99,6 +102,7 @@ func commandHandler(discord *discordgo.Session, message *discordgo.MessageCreate
 		return
 	}
 
+	// run middleware
 	m := *middleware
 	if err := m(*ctx); err != nil {
 		log.Println(err)
@@ -113,6 +117,7 @@ func registerCommands(sc chan os.Signal) {
 	CmdHandler.Register("ping", internal.Logging, internal.Ping, "respongs")
 	CmdHandler.Register("avatar", internal.Logging, internal.Avatar, "returns user's avatar")
 	CmdHandler.Register("user", internal.Logging, internal.Username, "returns user's username")
+	CmdHandler.Register("play", internal.CheckVoice, internal.Play, "play the given song")
 	CmdHandler.Register("pl", internal.CheckVoice, internal.PlayPlaylist, "play the given playlist")
 	CmdHandler.Register("shutdown", internal.Logging, func(ctx framework.Context) {
 		ctx.Reply("Bye!")
