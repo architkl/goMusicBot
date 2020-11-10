@@ -22,15 +22,7 @@ func (player *Player) AddSongs(songs ...Song) {
 	player.Queue = append(player.Queue, songs...)
 }
 
-func (player *Player) StartPlaying(session *discordgo.Session, guildID, authorID string) {
-
-	// Find the guild for that channel.
-	guild, err := session.State.Guild(guildID)
-	if err != nil {
-		// Could not find guild.
-		log.Println("Could not find guild: ", err)
-		return
-	}
+func (player *Player) StartPlaying(session *discordgo.Session, guild *discordgo.Guild, authorID string) {
 
 	// Look for the message sender in that guild's current voice states.
 	var voiceChannelID string
@@ -42,7 +34,8 @@ func (player *Player) StartPlaying(session *discordgo.Session, guildID, authorID
 	}
 
 	// Join the provided voice channel.
-	vc, err := session.ChannelVoiceJoin(guildID, voiceChannelID, false, true)
+	// vc - voice connection
+	vc, err := session.ChannelVoiceJoin(guild.ID, voiceChannelID, false, true)
 	if err != nil {
 		log.Println(err)
 		return

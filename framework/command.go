@@ -27,8 +27,6 @@ func (handler CommandHandler) GetCmds() CmdMap {
 
 func (handler CommandHandler) Get(name string) (*Middleware, *Command, bool) {
 	cmd, found := handler.cmds[name]
-	// For legacy reasons, lets just deliver the commnd
-	// A new function can be made GetAll() ??
 	return &cmd.middleware, &cmd.command, found
 }
 
