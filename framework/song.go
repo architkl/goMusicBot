@@ -24,9 +24,10 @@ func NewIdListHandler() *IdListHandler {
 }
 
 func (songList *IdListHandler) LoadSongs() {
-	file, err := os.OpenFile("./docs/keys.txt", os.O_RDWR|os.O_CREATE, 0755)
+	// load songs from file system to program
+	file, err := os.OpenFile("./docs/keys.txt", os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 		return
 	}
 
@@ -46,4 +47,28 @@ func (songList *IdListHandler) LoadSongs() {
 	if err != nil {
 		log.Println(err)
 	}
+}
+
+func (songList *IdListHandler) UpdateSongs(videoId, title string) error {
+	// update id map (program)
+	songList.IdList[videoId] = title
+
+	// update keys.txt (file system)
+	file, err := os.OpenFile("./docs/keys.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	// write new id and title
+	if _, err := file.WriteString(videoId + "," + title + "\n"); err != nil {
+		log.Println(err)
+	}
+
+	// close the file
+	if err := file.Close(); err != nil {
+		log.Println(err)
+	}
+
+	return nil
 }
