@@ -4,7 +4,7 @@ import "log"
 
 func HandleError(err error, message string) {
 	if message == "" {
-		message = "Error making API call"
+		message = "Error"
 	}
 	if err != nil {
 		log.Println(message+": %v", err.Error())
