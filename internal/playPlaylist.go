@@ -4,7 +4,6 @@ import (
 	"../framework"
 	"../pkg"
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 	"strings"
@@ -20,7 +19,8 @@ func PlayPlaylist(ctx framework.Context) {
 
 	playlistName := args[0]
 
-	file, err := os.OpenFile("./docs/playlists/"+playlistName+".txt", os.O_RDONLY, 0755)
+	// open stored playlist
+	file, err := os.OpenFile("./docs/playlists/"+playlistName+".txt", os.O_RDONLY, 0666)
 	if err != nil {
 		log.Println(err)
 		ctx.Reply("Playlist not found")
@@ -32,8 +32,6 @@ func PlayPlaylist(ctx framework.Context) {
 	for scanner.Scan() {
 		line := scanner.Text()
 		words := strings.Split(line, ",")
-
-		fmt.Println(words[0] + " " + words[1])
 
 		songs = append(songs, framework.Song{
 			Id:    words[0],
