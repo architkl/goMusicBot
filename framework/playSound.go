@@ -10,7 +10,7 @@ import (
 func playSound(vc *discordgo.VoiceConnection, buffer [][]byte) {
 
 	// Sleep for a specified amount of time before playing the sound
-	time.Sleep(1000 * time.Millisecond)
+	time.Sleep(250 * time.Millisecond)
 
 	// Start speaking.
 	vc.Speaking(true)
@@ -24,5 +24,5 @@ func playSound(vc *discordgo.VoiceConnection, buffer [][]byte) {
 	vc.Speaking(false)
 
 	// Sleep for a specificed amount of time before ending.
-	time.Sleep(1000 * time.Millisecond)
+	time.Sleep(250 * time.Millisecond)
 }
