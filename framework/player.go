@@ -8,6 +8,7 @@ import (
 
 type Player struct {
 	Queue     []Song
+	idx       int
 	Current   *Song
 	IsRunning bool
 }
@@ -41,10 +42,17 @@ func (player *Player) StartPlaying(session *discordgo.Session, guild *discordgo.
 		return
 	}
 
+	// set the player to running
 	player.IsRunning = true
 
-	for idx := 0; idx < len(player.Queue); idx++ {
-		song := player.Queue[idx]
+	// check if index is at end of queue
+	if player.idx == len(player.Queue) {
+		player.idx = 0
+	}
+
+	// loop through the queue
+	for idx := &player.idx; *idx < len(player.Queue); *idx++ {
+		song := player.Queue[*idx]
 		var buffer = make([][]byte, 0)
 		err := loadSound(song.Id, &buffer)
 		if err != nil {
