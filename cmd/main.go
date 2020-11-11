@@ -20,7 +20,7 @@ var (
 	fPrefix    = flag.String("p", "+", "bot prefix")
 	CmdHandler = framework.NewCommandHandler()
 	player     = framework.NewMediaPlayer()
-	sc         = make(chan os.Signal, 1)
+	sc         = make(chan os.Signal, 1) // channel to receive signal to shutdown bot
 	songIdList = framework.NewIdListHandler()
 	botId      string
 )
@@ -28,10 +28,6 @@ var (
 func main() {
 	flag.Parse()
 
-	// channel to receive signal to shutdown bot
-	// sc := make(chan os.Signal, 1)
-	// CmdHandler = framework.NewCommandHandler()
-	// player = framework.NewMediaPlayer()
 	songIdList.LoadSongs()
 	registerCommands(sc)
 

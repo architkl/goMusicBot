@@ -1,5 +1,3 @@
 client_secret.json
 songs/
 docs/
-internal/play.go
-internal/search.go
