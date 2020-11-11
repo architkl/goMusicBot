@@ -15,7 +15,6 @@ type Context struct {
 	MediaPlayer *Player
 	CmdHandler  *CommandHandler
 	SongIdList  *IdListHandler
-	// VoiceChannel *discordgo.Channel
 }
 
 func NewContext(discord *discordgo.Session, guild *discordgo.Guild, textChannel *discordgo.Channel,
@@ -41,18 +40,3 @@ func (ctx Context) Reply(content string) *discordgo.Message {
 	}
 	return msg
 }
-
-/*
-func (ctx *Context) GetVoiceChannel() *discordgo.Channel {
-	if ctx.VoiceChannel != nil {
-		return ctx.VoiceChannel
-	}
-	for _, state := range ctx.Guild.VoiceStates {
-		if state.UserID == ctx.User.ID {
-			channel, _ := ctx.Discord.State.Channel(state.ChannelID)
-			ctx.VoiceChannel = channel
-			return channel
-		}
-	}
-	return nil
-}*/
