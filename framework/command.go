@@ -34,9 +34,6 @@ func (handler CommandHandler) Register(name string, middleware Middleware, comma
 	// Massage the arguments into a "Full command"
 	cmdstruct := CommandStruct{middleware: middleware, command: command, help: helpmsg}
 	handler.cmds[name] = cmdstruct
-	if len(name) > 1 {
-		handler.cmds[name[:1]] = cmdstruct
-	}
 }
 
 func (command CommandStruct) GetHelp() string {
