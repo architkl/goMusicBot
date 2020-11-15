@@ -2,14 +2,23 @@ package internal
 
 import (
 	"../framework"
+	"log"
 	"strings"
 )
 
-func Play(ctx framework.Context) {
+// Play given song or resume if paused
+func PlaySong(ctx framework.Context) {
+
 	args := strings.Join(ctx.Args, " ")
 
+	// Resume playing if no args
 	if args == "" {
-		ctx.Reply("Enter the song name!")
+		if err := CheckSameChannel(ctx); err != nil {
+			log.Println(err)
+		} else if err := ctx.MediaPlayer.Resume(); err != nil {
+			ctx.Reply("No song to play!")
+		}
+
 		return
 	}
 
@@ -50,15 +59,19 @@ func Play(ctx framework.Context) {
 		}
 	}
 
+	// Create Song struct
 	song := framework.Song{
 		Id:    videoId,
 		Title: storedTitle,
 	}
 
+	// Add songs to queue
 	ctx.MediaPlayer.AddSongs(song)
 
 	// start the player if its not running
-	if !ctx.MediaPlayer.IsRunning {
-		ctx.MediaPlayer.StartPlaying(ctx.Discord, ctx.Guild, ctx.Message.Author.ID)
+	if !ctx.MediaPlayer.IsConnected {
+		go ctx.MediaPlayer.StartPlaying(ctx.Discord, ctx.Guild, ctx.Message.Author.ID)
+	} else if ctx.MediaPlayer.IsPaused {
+		ctx.MediaPlayer.Resume()
 	}
 }
