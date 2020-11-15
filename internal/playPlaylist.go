@@ -9,7 +9,9 @@ import (
 	"strings"
 )
 
+// Play the given playlist
 func PlayPlaylist(ctx framework.Context) {
+
 	args := ctx.Args
 
 	if len(args) < 1 {
@@ -19,7 +21,7 @@ func PlayPlaylist(ctx framework.Context) {
 
 	playlistName := args[0]
 
-	// open stored playlist
+	// Open stored playlist
 	file, err := os.OpenFile("./docs/playlists/"+playlistName+".txt", os.O_RDONLY, 0666)
 	if err != nil {
 		log.Println(err)
@@ -50,7 +52,7 @@ func PlayPlaylist(ctx framework.Context) {
 	ctx.MediaPlayer.AddSongs(songs...)
 
 	// start the player if its not running
-	if !ctx.MediaPlayer.IsRunning {
-		ctx.MediaPlayer.StartPlaying(ctx.Discord, ctx.Guild, ctx.Message.Author.ID)
+	if !ctx.MediaPlayer.IsConnected {
+		go ctx.MediaPlayer.StartPlaying(ctx.Discord, ctx.Guild, ctx.Message.Author.ID)
 	}
 }
