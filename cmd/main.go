@@ -26,8 +26,8 @@ var (
 )
 
 func main() {
-	flag.Parse()
 
+	flag.Parse()
 	songIdList.LoadSongs()
 	registerCommands(sc)
 
@@ -59,7 +59,16 @@ func main() {
 	dg.Close()
 }
 
+// Check user messages for valid commands
 func commandHandler(discord *discordgo.Session, message *discordgo.MessageCreate) {
+
+	// Recover in case a command panics
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("Recovered from: ", r)
+		}
+	}()
+
 	user := message.Author
 	if user.ID == botId || user.Bot {
 		return
@@ -109,12 +118,17 @@ func commandHandler(discord *discordgo.Session, message *discordgo.MessageCreate
 	c(*ctx)
 }
 
+// Register user commands
 func registerCommands(sc chan os.Signal) {
+
 	CmdHandler.Register("ping", internal.Logging, internal.Ping, "respongs")
 	CmdHandler.Register("avatar", internal.Logging, internal.Avatar, "returns user's avatar")
 	CmdHandler.Register("user", internal.Logging, internal.Username, "returns user's username")
-	CmdHandler.Register("play", internal.CheckVoice, internal.Play, "play the given song")
-	CmdHandler.Register("pl", internal.CheckVoice, internal.PlayPlaylist, "play the given playlist")
+	CmdHandler.Register("play", internal.CanPlay, internal.PlaySong, "play the given song")
+	CmdHandler.Register("pl", internal.CanPlay, internal.PlayPlaylist, "play the given playlist")
+	CmdHandler.Register("pause", internal.CheckSameChannel, internal.Pause, "play the given playlist")
+	CmdHandler.Register("cc", internal.CanPlay, internal.Connect, "connect the player")
+	CmdHandler.Register("dc", internal.CheckSameChannel, internal.Disconnect, "disconnect the player")
 	CmdHandler.Register("shutdown", internal.Logging, func(ctx framework.Context) {
 		ctx.Reply("Bye!")
 		sc <- os.Interrupt
