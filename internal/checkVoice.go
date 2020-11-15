@@ -6,7 +6,6 @@ import (
 )
 
 func CheckVoice(ctx framework.Context) error {
-	Logging(ctx)
 
 	guild := ctx.Guild
 
