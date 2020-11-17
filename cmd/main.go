@@ -121,13 +121,20 @@ func commandHandler(discord *discordgo.Session, message *discordgo.MessageCreate
 // Register user commands
 func registerCommands(sc chan os.Signal) {
 
-	CmdHandler.Register("ping", internal.Logging, internal.Ping, "respongs")
-	CmdHandler.Register("avatar", internal.Logging, internal.Avatar, "returns user's avatar")
-	CmdHandler.Register("user", internal.Logging, internal.Username, "returns user's username")
-	CmdHandler.Register("play", internal.CanPlay, internal.PlaySong, "play the given song")
-	CmdHandler.Register("pl", internal.CanPlay, internal.PlayPlaylist, "play the given playlist")
-	CmdHandler.Register("pause", internal.CheckSameChannel, internal.Pause, "play the given playlist")
-	CmdHandler.Register("dc", internal.CheckSameChannel, internal.Disconnect, "disconnect the player")
+	// Basic commands
+	CmdHandler.Register("ping", internal.Logging, internal.Ping, "Respongs")
+	CmdHandler.Register("avatar", internal.Logging, internal.Avatar, "Returns user's avatar")
+	CmdHandler.Register("user", internal.Logging, internal.Username, "Returns user's username")
+
+	// Media player commands
+	CmdHandler.Register("play", internal.CanPlay, internal.PlaySong, "Play the given song")
+	CmdHandler.Register("pl", internal.CanPlay, internal.PlayPlaylist, "Play the given playlist")
+	CmdHandler.Register("pause", internal.CheckSameChannel, internal.Pause, "Play the given playlist")
+	CmdHandler.Register("dc", internal.CheckSameChannel, internal.Disconnect, "Disconnect the player")
+
+	// Playlist commands
+	CmdHandler.Register("newpl", internal.Logging, internal.CreatePlaylist, "Create a new playlist")
+
 	CmdHandler.Register("shutdown", internal.Logging, func(ctx framework.Context) {
 		ctx.Reply("Bye!")
 		sc <- os.Interrupt
