@@ -127,7 +127,6 @@ func registerCommands(sc chan os.Signal) {
 	CmdHandler.Register("play", internal.CanPlay, internal.PlaySong, "play the given song")
 	CmdHandler.Register("pl", internal.CanPlay, internal.PlayPlaylist, "play the given playlist")
 	CmdHandler.Register("pause", internal.CheckSameChannel, internal.Pause, "play the given playlist")
-	CmdHandler.Register("cc", internal.CanPlay, internal.Connect, "connect the player")
 	CmdHandler.Register("dc", internal.CheckSameChannel, internal.Disconnect, "disconnect the player")
 	CmdHandler.Register("shutdown", internal.Logging, func(ctx framework.Context) {
 		ctx.Reply("Bye!")
