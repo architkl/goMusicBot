@@ -6,7 +6,7 @@ import (
 	"bufio"
 	"log"
 	"os"
-	"strings"
+	// "strings"
 )
 
 // Play the given playlist
@@ -32,12 +32,11 @@ func PlayPlaylist(ctx framework.Context) {
 	scanner := bufio.NewScanner(file)
 	var songs []framework.Song
 	for scanner.Scan() {
-		line := scanner.Text()
-		words := strings.Split(line, ",")
+		songId := scanner.Text()
 
 		songs = append(songs, framework.Song{
-			Id:    words[0],
-			Title: words[1],
+			Id:    songId,
+			Title: ctx.SongIdList.IdList[songId],
 		})
 	}
 
