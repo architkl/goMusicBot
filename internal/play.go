@@ -4,6 +4,7 @@ import (
 	"../framework"
 	"log"
 	"strings"
+	"time"
 )
 
 // Play given song or resume if paused
@@ -13,59 +14,62 @@ func PlaySong(ctx framework.Context) {
 
 	// Resume playing if no args
 	if args == "" {
-		if err := CheckSameChannel(ctx); err != nil {
+		if !ctx.MediaPlayer.IsConnected {
+			if len(ctx.MediaPlayer.Queue) == 0 {
+				ctx.ReplyEmbed("Oops!", "No song to play!", 0xEB5160)
+			} else {
+				ctx.MediaPlayer.StartPlaying(ctx.Discord, ctx.Guild, ctx.Message.Author.ID)
+			}
+		} else if err := CheckSameChannel(ctx); err != nil {
 			log.Println(err)
 		} else if err := ctx.MediaPlayer.Resume(); err != nil {
-			ctx.Reply("No song to play!")
+			ctx.ReplyEmbed("Oops!", "No song to play!", 0xEB5160)
 		}
 
 		return
 	}
 
-	// search for the song online
-	videoId, title := Search(args)
+	// Get song details
+	var song framework.Song
+	song.Id, song.Title, song.Duration = GetMetaData(args)
 
-	if videoId == "" {
-		ctx.Reply("Song not found")
+	if song.Id == "" {
+		ctx.ReplyEmbed("Oops!", args+" not found", 0xEB5160)
 		return
 	}
 
-	// check if song present locally
-	storedTitle, ok := ctx.SongIdList.IdList[videoId]
+	// Check if duration is too long
+	if d, err := time.ParseDuration(song.Duration); err != nil {
+		ctx.ReplyEmbed("Oops!", "Encountered an error", 0xEB5160)
+		return
+	} else {
+		lmt, _ := time.ParseDuration("1h")
+
+		if d > lmt {
+			ctx.ReplyEmbed("Oops!", "Song length too long", 0xEB5160)
+			return
+		}
+	}
+
+	// Check if song present locally
+	_, ok := ctx.SongIdList.IdList[song.Id]
 	if !ok {
-		// get song from youtube
-		if err := Get(videoId); err != nil {
-			ctx.Reply("Song not found")
+		// Get the song in dca format
+		if err := GetSong(song.Id); err != nil {
+			log.Println("PlaySong(): " + err.Error())
+			ctx.ReplyEmbed("Oops!", err.Error(), 0xEB5160)
 			return
 		}
 
-		// convert to mp3
-		if err := ConvertMp3(videoId); err != nil {
-			ctx.Reply("Song not found")
-			return
-		}
-
-		// convert to dca
-		if err := ConvertDca(videoId); err != nil {
-			ctx.Reply("Song not found")
-			return
-		}
-
-		// update song in program and file system
-		storedTitle = title
-		if err := ctx.SongIdList.UpdateSongs(videoId, title); err != nil {
-			ctx.Reply("Unable to load song")
+		// Update song in program and file system
+		if err := ctx.SongIdList.UpdateSongs(song); err != nil {
+			log.Println("PlaySong(): " + err.Error())
+			ctx.ReplyEmbed("Oops!", "Unable to load song", 0xEB5160)
 			return
 		}
 	}
 
-	// Create Song struct
-	song := framework.Song{
-		Id:    videoId,
-		Title: storedTitle,
-	}
-
-	// Add songs to queue
+	// Add song to queue
 	ctx.MediaPlayer.AddSongs(song)
 
 	// start the player if its not running
@@ -74,4 +78,6 @@ func PlaySong(ctx framework.Context) {
 	} else if ctx.MediaPlayer.IsPaused {
 		ctx.MediaPlayer.Resume()
 	}
+
+	ctx.ReplyEmbed(song.Title+" queued!", "", 0xEDD382)
 }
