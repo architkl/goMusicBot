@@ -12,7 +12,7 @@ func CheckSameChannel(ctx framework.Context) error {
 
 	// Check if connected
 	if !ctx.MediaPlayer.IsConnected {
-		ctx.Reply("Bot not connected!")
+		ctx.ReplyEmbed("Oops!", "Bot not connected!", 0xEB5160)
 		return errors.New("Player not connected")
 	}
 
@@ -21,7 +21,7 @@ func CheckSameChannel(ctx framework.Context) error {
 	userID = ctx.Message.Author.ID
 
 	if usr, err := ctx.Discord.User("@me"); err != nil {
-		ctx.Reply("Error")
+		ctx.ReplyEmbed("Oops!", "Error encountered", 0xEB5160)
 		return errors.New("Error obtaining account details")
 	} else {
 		botID = usr.ID
@@ -39,7 +39,7 @@ func CheckSameChannel(ctx framework.Context) error {
 	}
 
 	if userVoiceChannelID != botVoiceChannelID {
-		ctx.Reply("You're not in my voice channel!")
+		ctx.ReplyEmbed("Oops!", "You're not in my voice channel!", 0xEB5160)
 		return errors.New("User and Bot not in same channel")
 	}
 

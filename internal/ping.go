@@ -3,5 +3,5 @@ package internal
 import "../framework"
 
 func Ping(ctx framework.Context) {
-	ctx.Reply("pong")
+	ctx.ReplyEmbed("pong", "", 0x5539CC)
 }

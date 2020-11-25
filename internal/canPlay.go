@@ -21,7 +21,7 @@ func CanPlay(ctx framework.Context) error {
 
 	// User not in a voice channel
 	if userVoiceChannelID == "" {
-		ctx.Reply("Please join a voice channel!")
+		ctx.ReplyEmbed("Oops!", "Please join a voice channel!", 0xEB5160)
 		return errors.New("User not in voice channel")
 	}
 
@@ -33,7 +33,7 @@ func CanPlay(ctx framework.Context) error {
 	// Look for the message sender in that guild's current voice states.
 	var botID, botVoiceChannelID string
 	if usr, err := ctx.Discord.User("@me"); err != nil {
-		ctx.Reply("Error")
+		ctx.ReplyEmbed("Oops!", "Error encountered", 0xEB5160)
 		return errors.New("Error obtaining account details")
 	} else {
 		botID = usr.ID
@@ -48,7 +48,7 @@ func CanPlay(ctx framework.Context) error {
 	}
 
 	if userVoiceChannelID != botVoiceChannelID {
-		ctx.Reply("You're not in my voice channel!")
+		ctx.ReplyEmbed("Oops!", "You're not in my voice channel!", 0xEB5160)
 		return errors.New("User and Bot not in same channel")
 	}
 

@@ -2,11 +2,9 @@ package internal
 
 import (
 	"../framework"
-	"../pkg"
 	"bufio"
 	"log"
 	"os"
-	// "strings"
 )
 
 // Play the given playlist
@@ -15,7 +13,7 @@ func PlayPlaylist(ctx framework.Context) {
 	args := ctx.Args
 
 	if len(args) < 1 {
-		ctx.Reply("Enter the playlist name!")
+		ctx.ReplyEmbed("Oops!", "Enter the playlist name!", 0xEB5160)
 		return
 	}
 
@@ -25,7 +23,7 @@ func PlayPlaylist(ctx framework.Context) {
 	file, err := os.OpenFile("./docs/playlists/"+playlistName+".txt", os.O_RDONLY, 0666)
 	if err != nil {
 		log.Println(err)
-		ctx.Reply("Playlist not found")
+		ctx.ReplyEmbed("Oops!", "Playlist not found", 0xEB5160)
 		return
 	}
 
@@ -34,10 +32,7 @@ func PlayPlaylist(ctx framework.Context) {
 	for scanner.Scan() {
 		songId := scanner.Text()
 
-		songs = append(songs, framework.Song{
-			Id:    songId,
-			Title: ctx.SongIdList.IdList[songId],
-		})
+		songs = append(songs, ctx.SongIdList.IdList[songId])
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -45,8 +40,7 @@ func PlayPlaylist(ctx framework.Context) {
 		return
 	}
 
-	err = file.Close()
-	pkg.HandleError(err, "")
+	file.Close()
 
 	ctx.MediaPlayer.AddSongs(songs...)
 
@@ -54,4 +48,6 @@ func PlayPlaylist(ctx framework.Context) {
 	if !ctx.MediaPlayer.IsConnected {
 		go ctx.MediaPlayer.StartPlaying(ctx.Discord, ctx.Guild, ctx.Message.Author.ID)
 	}
+
+	ctx.ReplyEmbed(playlistName+" queued!", "", 0xFC9E4F)
 }
