@@ -1,8 +1,8 @@
 package framework
 
 import (
-	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"log"
 )
 
 type Context struct {
@@ -35,8 +35,37 @@ func NewContext(discord *discordgo.Session, guild *discordgo.Guild, textChannel 
 func (ctx Context) Reply(content string) *discordgo.Message {
 	msg, err := ctx.Discord.ChannelMessageSend(ctx.TextChannel.ID, content)
 	if err != nil {
-		fmt.Println("Error whilst sending message,", err)
+		log.Println("Error whilst sending message,", err)
 		return nil
 	}
 	return msg
+}
+
+func (ctx Context) ReplyEmbed(title, description string, colour int) {
+	if len(title) > 256 {
+		log.Println("ReplyEmbed(): Title exceeds 256 character limit")
+		title = title[:256]
+	}
+
+	if len(description) > 2048 {
+		log.Println("ReplyEmbed(): Description exceeds 2048 character limit")
+
+		if description[:5] == "```ml" {
+			description = description[:2045] + "```"
+		} else {
+			description = description[:2048]
+		}
+	}
+
+	embed := discordgo.MessageEmbed{
+		Title:       title,
+		Description: description,
+		Color:       colour,
+		Type:        discordgo.EmbedTypeRich,
+	}
+
+	_, err := ctx.Discord.ChannelMessageSendEmbed(ctx.TextChannel.ID, &embed)
+	if err != nil {
+		log.Println("Error whilst sending message,", err)
+	}
 }

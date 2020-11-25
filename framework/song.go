@@ -15,16 +15,16 @@ type (
 	}
 
 	IdListHandler struct {
-		IdList map[string]string
+		IdList map[string]Song
 	}
 )
 
 func NewIdListHandler() *IdListHandler {
-	return &IdListHandler{make(map[string]string)}
+	return &IdListHandler{make(map[string]Song)}
 }
 
 func (songList *IdListHandler) LoadSongs() {
-	// load songs from file system to program
+	// Load songs from file system to program
 	file, err := os.OpenFile("./docs/keys.txt", os.O_RDONLY|os.O_CREATE, 0666)
 	if err != nil {
 		log.Println(err)
@@ -34,9 +34,13 @@ func (songList *IdListHandler) LoadSongs() {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
-		words := strings.Split(line, ",")
+		words := strings.Split(line, ";")
 
-		songList.IdList[words[0]] = words[1]
+		songList.IdList[words[0]] = Song{
+			Id:       words[0],
+			Title:    words[1],
+			Duration: words[2],
+		}
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -49,23 +53,24 @@ func (songList *IdListHandler) LoadSongs() {
 	}
 }
 
-func (songList *IdListHandler) UpdateSongs(videoId, title string) error {
-	// update id map (program)
-	songList.IdList[videoId] = title
+func (songList *IdListHandler) UpdateSongs(song Song) error {
+	// Update id map (program)
+	songList.IdList[song.Id] = song
 
-	// update keys.txt (file system)
+	// Update keys.txt (file system)
 	file, err := os.OpenFile("./docs/keys.txt", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		log.Println(err)
 		return err
 	}
 
-	// write new id and title
-	if _, err := file.WriteString(videoId + "," + title + "\n"); err != nil {
+	// Write new id and title
+	if _, err := file.WriteString(song.Id + ";" + song.Title + ";" + song.Duration + "\n"); err != nil {
 		log.Println(err)
+		return err
 	}
 
-	// close the file
+	// Close the file
 	if err := file.Close(); err != nil {
 		log.Println(err)
 	}

@@ -123,20 +123,31 @@ func registerCommands(sc chan os.Signal) {
 
 	// Basic commands
 	CmdHandler.Register("ping", internal.Logging, internal.Ping, "Respongs")
-	CmdHandler.Register("avatar", internal.Logging, internal.Avatar, "Returns user's avatar")
-	CmdHandler.Register("user", internal.Logging, internal.Username, "Returns user's username")
+	CmdHandler.Register("avatar", internal.Logging, internal.Avatar, "Show avatar")
+	CmdHandler.Register("user", internal.Logging, internal.Username, "Show username")
+	CmdHandler.Register("help", internal.Logging, internal.Help, "Show description for each command")
 
 	// Media player commands
-	CmdHandler.Register("play", internal.CanPlay, internal.PlaySong, "Play the given song")
+	CmdHandler.Register("p", internal.CanPlay, internal.PlaySong, "Play the given song")
 	CmdHandler.Register("pl", internal.CanPlay, internal.PlayPlaylist, "Play the given playlist")
-	CmdHandler.Register("pause", internal.CheckSameChannel, internal.Pause, "Play the given playlist")
+	CmdHandler.Register("np", internal.CheckSameChannel, internal.NowPlaying, "Show current song")
+	CmdHandler.Register("pause", internal.CheckSameChannel, internal.Pause, "Pause")
+	CmdHandler.Register("shuffle", internal.CheckSameChannel, internal.Shuffle, "Shuffle queue")
+	CmdHandler.Register("n", internal.CheckSameChannel, internal.NextSong, "Play the next song")
 	CmdHandler.Register("dc", internal.CheckSameChannel, internal.Disconnect, "Disconnect the player")
 
 	// Playlist commands
 	CmdHandler.Register("newpl", internal.Logging, internal.CreatePlaylist, "Create a new playlist")
+	// CmdHandler.Register("removepl", internal.Logging, internal.RemovePlaylist, "Remove playlist")
+	CmdHandler.Register("showpl", internal.Logging, internal.ShowPlaylists, "Show playlists")
+	CmdHandler.Register("despl", internal.Logging, internal.DescribePlaylist, "Describe a playlist")
+	CmdHandler.Register("ads", internal.Logging, internal.AddSong, "Add song to playlist")
+	CmdHandler.Register("rs", internal.Logging, internal.RemoveSong, "Remove song from playlist")
+	CmdHandler.Register("q", internal.Logging, internal.DisplayQueue, "Show songs in queue")
 
+	// Shutdown
 	CmdHandler.Register("shutdown", internal.Logging, func(ctx framework.Context) {
-		ctx.Reply("Bye!")
+		ctx.ReplyEmbed("Bye!", "", 0x00C49A)
 		sc <- os.Interrupt
-	}, "shutdown the bot")
+	}, "Shutdown the bot")
 }

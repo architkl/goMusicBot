@@ -3,6 +3,7 @@ package framework
 import (
 	"errors"
 	"log"
+	"math/rand"
 	"sync"
 	"time"
 
@@ -16,7 +17,9 @@ type Player struct {
 	voice       *discordgo.VoiceConnection
 	IsConnected bool
 	IsPaused    bool
-	mu          sync.Mutex // lock for playing audio
+	skip        bool       // skip current song
+	audioMutex  sync.Mutex // lock for playing audio
+	queueMutex  sync.Mutex // lock for accessing queue
 }
 
 // create new player object
@@ -24,7 +27,7 @@ func NewMediaPlayer() *Player {
 	player := new(Player)
 	player.IsPaused = true
 	player.Queue = make([]Song, 0)
-	player.mu.Lock()
+	player.audioMutex.Lock()
 	return player
 }
 
@@ -100,12 +103,14 @@ func (player *Player) StartPlaying(session *discordgo.Session, guild *discordgo.
 
 	// Start speaking.
 	player.voice.Speaking(true)
-	player.mu.Unlock()
+	player.audioMutex.Unlock()
 	player.IsPaused = false
 
 	// loop through the queue
 	for idx := &player.idx; *idx < len(player.Queue); *idx++ {
+		player.queueMutex.Lock()
 		song := player.Queue[*idx]
+		player.queueMutex.Unlock()
 		var buffer = make([][]byte, 0)
 
 		// load song data from file system
@@ -126,10 +131,11 @@ func (player *Player) StartPlaying(session *discordgo.Session, guild *discordgo.
 	// Stop speaking
 	player.voice.Speaking(false)
 	player.IsPaused = true
-	player.mu.Lock()
+	player.audioMutex.Lock()
 
 	// Disconnect from the provided voice channel.
 	player.voice.Disconnect()
+	player.IsConnected = false
 }
 
 // playSound plays the current buffer to the provided channel.
@@ -140,15 +146,22 @@ func (player *Player) playSound(buffer [][]byte) {
 
 	// Send the buffer data.
 	for _, buff := range buffer {
-		player.mu.Lock()
+		player.audioMutex.Lock()
 		if !player.IsConnected {
 			// return due to disconnection
-			player.mu.Unlock()
+			player.audioMutex.Unlock()
+			return
+		}
+
+		if player.skip == true {
+			// skip current song
+			player.skip = false
+			player.audioMutex.Unlock()
 			return
 		}
 
 		player.voice.OpusSend <- buff
-		player.mu.Unlock()
+		player.audioMutex.Unlock()
 	}
 
 	// Sleep for a specificed amount of time before ending.
@@ -171,7 +184,7 @@ func (player *Player) Resume() error {
 
 	player.voice.Speaking(true)
 	player.IsPaused = false
-	player.mu.Unlock()
+	player.audioMutex.Unlock()
 	return nil
 }
 
@@ -184,7 +197,63 @@ func (player *Player) Pause() {
 		return
 	}
 
-	player.mu.Lock()
+	player.audioMutex.Lock()
 	player.voice.Speaking(false)
 	player.IsPaused = true
+}
+
+// Skips current song
+func (player *Player) Skip() {
+
+	// Check if at end of queue
+	if player.idx == len(player.Queue) {
+		log.Println("Player.Skip(): At end of queue")
+		return
+	}
+
+	// Resume if paused
+	if player.IsPaused {
+		player.Resume()
+	}
+
+	player.audioMutex.Lock()
+	player.skip = true
+	player.audioMutex.Unlock()
+}
+
+// Return index of current song
+func (player *Player) CurPosition() (int, error) {
+
+	// Check if empty queue
+	if len(player.Queue) == 0 {
+		log.Println("Player.CurPosition(): At end of queue")
+		return 0, errors.New("No song to play!")
+	}
+
+	return player.idx, nil
+}
+
+// Shuffle the queue current song onwards
+func (player *Player) Shuffle() error {
+
+	// Check if at end of queue
+	if player.idx == len(player.Queue) {
+		log.Println("Player.Shuffle(): At end of queue")
+		return errors.New("")
+	}
+
+	// Divide queue on current song
+	q1 := player.Queue[:player.idx+1]
+	q2 := player.Queue[player.idx+1:]
+
+	// Shuffle the second part
+	rand.Seed(time.Now().UnixNano())
+	rand.Shuffle(len(q2), func(i, j int) { q2[i], q2[j] = q2[j], q2[i] })
+
+	// Merge them back
+	player.queueMutex.Lock()
+	player.Queue = append(q1, q2...)
+	player.queueMutex.Unlock()
+
+	return nil
 }
