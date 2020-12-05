@@ -85,6 +85,15 @@ func (player *Player) AddSongs(songs ...Song) {
 	player.Queue = append(player.Queue, songs...)
 }
 
+// Clear the queue
+func (player *Player) ClearQueue() {
+	player.queueMutex.Lock()
+	player.DisconnectVoice()
+	player.Queue = nil
+	player.idx = 0
+	player.queueMutex.Unlock()
+}
+
 // Start playing audio
 func (player *Player) StartPlaying(session *discordgo.Session, guild *discordgo.Guild, authorID string) {
 
@@ -254,6 +263,32 @@ func (player *Player) Shuffle() error {
 	player.queueMutex.Lock()
 	player.Queue = append(q1, q2...)
 	player.queueMutex.Unlock()
+
+	return nil
+}
+
+// Remove song from queue
+func (player *Player) RemoveFromQueue(idx int) error {
+
+	// Check if index is valid
+	if idx < 0 || idx >= len(player.Queue) {
+		return errors.New("Invalid Index!")
+	}
+
+	player.queueMutex.Lock()
+	// Shift all elements after idx left
+	if idx+1 != len(player.Queue) {
+		copy(player.Queue[idx:], player.Queue[idx+1:])
+	}
+
+	// Remove the last element
+	player.Queue = player.Queue[:len(player.Queue)-1]
+	player.queueMutex.Unlock()
+
+	// If current song removed then skip
+	if idx == player.idx {
+		player.Skip()
+	}
 
 	return nil
 }

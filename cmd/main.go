@@ -134,6 +134,8 @@ func registerCommands(sc chan os.Signal) {
 	CmdHandler.Register("pause", internal.CheckSameChannel, internal.Pause, "Pause")
 	CmdHandler.Register("shuffle", internal.CheckSameChannel, internal.Shuffle, "Shuffle queue")
 	CmdHandler.Register("n", internal.CheckSameChannel, internal.NextSong, "Play the next song")
+	CmdHandler.Register("r", internal.CheckSameChannel, internal.RemoveFromQueue, "Remove song from queue")
+	CmdHandler.Register("cl", internal.CanPlay, internal.ClearQueue, "Clear the queue")
 	CmdHandler.Register("dc", internal.CheckSameChannel, internal.Disconnect, "Disconnect the player")
 
 	// Playlist commands
@@ -142,7 +144,8 @@ func registerCommands(sc chan os.Signal) {
 	CmdHandler.Register("showpl", internal.Logging, internal.ShowPlaylists, "Show playlists")
 	CmdHandler.Register("despl", internal.Logging, internal.DescribePlaylist, "Describe a playlist")
 	CmdHandler.Register("ads", internal.Logging, internal.AddSong, "Add song to playlist")
-	CmdHandler.Register("rs", internal.Logging, internal.RemoveSong, "Remove song from playlist")
+	CmdHandler.Register("rs", internal.Logging, internal.RemoveSongByIndex, "Remove song by index from playlist")
+	CmdHandler.Register("rsn", internal.Logging, internal.RemoveSongByName, "Remove song by name from playlist")
 	CmdHandler.Register("q", internal.Logging, internal.DisplayQueue, "Show songs in queue")
 
 	// Shutdown
