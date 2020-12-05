@@ -49,5 +49,5 @@ func PlayPlaylist(ctx framework.Context) {
 		go ctx.MediaPlayer.StartPlaying(ctx.Discord, ctx.Guild, ctx.Message.Author.ID)
 	}
 
-	ctx.ReplyEmbed(playlistName+" queued!", "", 0xFC9E4F)
+	ctx.ReplyEmbed(playlistName+" queued!", "", 0xFFD900)
 }

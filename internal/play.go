@@ -79,5 +79,5 @@ func PlaySong(ctx framework.Context) {
 		ctx.MediaPlayer.Resume()
 	}
 
-	ctx.ReplyEmbed(song.Title+" queued!", "", 0xEDD382)
+	ctx.ReplyEmbed(song.Title+" queued!", "", 0xFFD900)
 }
