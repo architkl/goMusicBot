@@ -23,11 +23,11 @@ func RemoveFromQueue(ctx framework.Context) {
 		log.Println("RemoveFromQueue(): " + err.Error())
 		ctx.ReplyEmbed("Oops!", "Invalid index!", 0xEB5160)
 	} else {
-		if err := ctx.MediaPlayer.RemoveFromQueue(idx - 1); err != nil {
+		if songName, err := ctx.MediaPlayer.RemoveFromQueue(idx - 1); err != nil {
 			log.Println("RemoveFromQueue(): " + err.Error())
 			ctx.ReplyEmbed("Oops!", "Invalid index!", 0xEB5160)
 		} else {
-			ctx.ReplyEmbed("Song Removed!", "", 0x3365A0)
+			ctx.ReplyEmbed(songName+" Removed!", "", 0x3365A0)
 		}
 	}
 }
@@ -106,7 +106,7 @@ func RemoveSongByName(ctx framework.Context) {
 		return
 	}
 
-	ctx.ReplyEmbed("Song removed successfully", "", 0x00C49A)
+	ctx.ReplyEmbed(songName+" removed successfully", "", 0x00C49A)
 }
 
 // Remove song by index from playlist
