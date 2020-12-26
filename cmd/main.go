@@ -135,6 +135,7 @@ func registerCommands(sc chan os.Signal) {
 	CmdHandler.Register("shuffle", internal.CheckSameChannel, internal.Shuffle, "Shuffle queue")
 	CmdHandler.Register("n", internal.CheckSameChannel, internal.NextSong, "Play the next song")
 	CmdHandler.Register("r", internal.CheckSameChannel, internal.RemoveFromQueue, "Remove song from queue")
+	CmdHandler.Register("m", internal.CheckSameChannel, internal.MovePosition, "Move song position by index")
 	CmdHandler.Register("cl", internal.CanPlay, internal.ClearQueue, "Clear the queue")
 	CmdHandler.Register("dc", internal.CheckSameChannel, internal.Disconnect, "Disconnect the player")
 

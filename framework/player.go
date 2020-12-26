@@ -268,12 +268,14 @@ func (player *Player) Shuffle() error {
 }
 
 // Remove song from queue
-func (player *Player) RemoveFromQueue(idx int) error {
+func (player *Player) RemoveFromQueue(idx int) (string, error) {
 
 	// Check if index is valid
 	if idx < 0 || idx >= len(player.Queue) {
-		return errors.New("Invalid Index!")
+		return "", errors.New("Invalid Index!")
 	}
+
+	songName := player.Queue[idx].Title
 
 	player.queueMutex.Lock()
 	// Shift all elements after idx left
@@ -289,6 +291,41 @@ func (player *Player) RemoveFromQueue(idx int) error {
 	if idx == player.idx {
 		player.Skip()
 	}
+
+	return songName, nil
+}
+
+// Move song in queue
+func (player *Player) MoveSongPosition(src, dest int) error {
+
+	// Check if index are valid
+	if src < 0 || src >= len(player.Queue) {
+		return errors.New("Invalid Old Index!")
+	}
+
+	if dest < 0 || dest >= len(player.Queue) {
+		return errors.New("Invalid New Index!")
+	}
+
+	if src == dest {
+		return nil
+	}
+
+	player.queueMutex.Lock()
+	song := player.Queue[src]
+
+	// Determine which of src, dest comes first
+	if src < dest {
+		// Shift elements [src+1, dest+1) to left
+		copy(player.Queue[src:dest], player.Queue[src+1:dest+1])
+	} else {
+		// Shift elements [dest, src) to right
+		copy(player.Queue[dest+1:src+1], player.Queue[dest:src])
+	}
+
+	// Copy src to dest
+	player.Queue[dest] = song
+	player.queueMutex.Unlock()
 
 	return nil
 }
