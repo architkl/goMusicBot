@@ -1,8 +1,8 @@
 package internal
 
 import (
-	"../framework"
-	"../pkg"
+	"architkl/goMusicBot/framework"
+	"architkl/goMusicBot/pkg"
 	"log"
 	"strconv"
 	"strings"

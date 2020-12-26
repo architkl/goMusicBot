@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"../framework"
+	"architkl/goMusicBot/framework"
 	"io/ioutil"
 	"log"
 	"strings"

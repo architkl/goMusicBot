@@ -6,7 +6,7 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/kkdai/youtube"
+	"github.com/kkdai/youtube/v2"
 )
 
 // Get videoID, title and duration from url or id

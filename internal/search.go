@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"../pkg"
+	"architkl/goMusicBot/pkg"
 	"log"
 
 	"google.golang.org/api/youtube/v3"

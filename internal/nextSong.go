@@ -1,7 +1,7 @@
 package internal
 
 import (
-	"../framework"
+	"architkl/goMusicBot/framework"
 )
 
 func NextSong(ctx framework.Context) {
